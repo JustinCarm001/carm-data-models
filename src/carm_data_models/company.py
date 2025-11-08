@@ -132,28 +132,78 @@ class Company(BaseModel):
         }
 
 
+class AzureConfig(BaseModel):
+    """
+    Azure infrastructure configuration for a company
+
+    Each Carm Visuals customer gets their own Azure resources:
+    - Key Vault for secure credential storage
+    - Storage Account for files/data
+    - Resource Group for organization
+    """
+    key_vault_url: Optional[str] = Field(
+        None,
+        description="Azure Key Vault URL for this customer (e.g., https://customer-kv.vault.azure.net/)"
+    )
+    storage_account_url: Optional[str] = Field(
+        None,
+        description="Azure Storage Account URL (e.g., https://customerstorage.blob.core.windows.net/)"
+    )
+    resource_group: Optional[str] = Field(
+        None,
+        description="Azure Resource Group name"
+    )
+    subscription_id: Optional[str] = Field(
+        None,
+        description="Azure Subscription ID"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "key_vault_url": "https://customer-kv.vault.azure.net/",
+                "storage_account_url": "https://customerstorage.blob.core.windows.net/",
+                "resource_group": "rg-customer",
+                "subscription_id": "12345678-1234-1234-1234-123456789012"
+            }
+        }
+
+
 class CompanyProfile(BaseModel):
     """
     Full company profile with detailed information
-    
+
     PSEUDO CODE:
     1. Extend Company model
     2. Add mission, vision, values
     3. Add team information
     4. Add portfolio/examples
     5. Add differentiators
-    
+    6. Add Azure infrastructure config
+
     This is used for YOUR company (Carm Visuals) to store:
     - Your services
     - Your mission/values
     - Your team
     - Your differentiators
-    
+    - Your Azure Key Vault (for secure credential storage)
+
     This data is loaded from settings and used by draft agent
     to personalize outreach emails FROM you.
+
+    For multi-tenant security:
+    - Each customer has their own Key Vault
+    - QuickBooks tokens saved to customer's Key Vault
+    - Complete isolation between customers
     """
     # Basic company info
     company: Company = Field(..., description="Basic company information")
+
+    # Azure infrastructure (for secure multi-tenant storage)
+    azure_config: Optional[AzureConfig] = Field(
+        None,
+        description="Azure infrastructure configuration for this customer"
+    )
     
     # Brand messaging
     tagline: Optional[str] = Field(None, description="Company tagline")
